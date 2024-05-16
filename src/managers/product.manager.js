@@ -14,7 +14,7 @@ export default class ProductMaganer {
                 if(limit) return parsedProducts.slice(0, limit);
                 return parsedProducts;
             } else {
-                return console.log("Not found.");
+                return [];
             }
         } catch(error){
             console.error(error);
@@ -52,10 +52,8 @@ export default class ProductMaganer {
         try {
             const products = await this.getProducts();
             let productExist = await this.getProductByID(id);
-            console.log(productExist);
             if (!productExist) return null;
             const updatedProduct = {...productExist, ...product}
-            console.log(updatedProduct);
             const newProduct = products.filter(p => p.id !== id);
             newProduct.push(updatedProduct);
             await fs.promises.writeFile(this.path, JSON.stringify(newProduct));
@@ -87,14 +85,5 @@ export default class ProductMaganer {
             console.error(error);
         }
     }
-
-    // async deleteFile() {
-    //     try {
-    //         await fs.promises.unlink(this.path);
-    //         console.log("Archivo eliminado correctamente.")
-    //     } catch(error) {
-    //         console.error(error);
-    //     }
-    // }
 }
 
