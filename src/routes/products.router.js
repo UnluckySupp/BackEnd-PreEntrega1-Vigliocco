@@ -12,7 +12,7 @@ products.get('/', async(req,res)=>{
     try{
         const { limit } = req.query;
         const products = await productManager.getProducts(Number(limit));
-        console.log(products);
+        if (!products) res.status(404).json({message:"Products not found"});
         res.status(200).json(products);
     } catch (error) {
         res.status(404).json({message:error.message})
@@ -46,6 +46,7 @@ products.put("/:idProduct", async (req,res) => {
         const product = req.body;
         const productUpdate = await productManager.updateProduct(product, idProduct);
         if (!productUpdate) res.status(404).json({message:"Error updating product."});
+        res.status(200).json({message: "OK", product: productUpdate });
     } catch {
         res.status(500).json({message:error.message});
     }

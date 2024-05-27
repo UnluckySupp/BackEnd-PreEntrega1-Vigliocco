@@ -76,6 +76,5 @@ export default class CartManager {
             console.error(error);
         }
     } 
-
 }
 
