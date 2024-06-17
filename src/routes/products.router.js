@@ -1,66 +1,81 @@
-import { Router } from "express";
+import { Router } from 'express';
+import { productCheck } from '../middlewares/productCheck.js';
+import ProductManager from '../dao/mongoDB/product.dao.js';
+
+const productManager = new ProductManager();
+
 const products = Router();
 
-import { __dirname } from "../path.js";
+products.get('/', async (req, res) => {
+  try {
+    const { limit, sort, page, category } = req.query;
+    const filter = {
+      limit: limit || 10,
+      sort: { price: sort === 'asc' ? 1 : -1 },
+      page: page || 1,
+    };
+    const query = {
+      status: true,
+    };
+    category ? (query.category = category) : null;
+    const products = await productManager.getProducts(query, filter);
+    if (!products) res.status(404).json({ message: 'Products not found' });
+    res.status(200).json({ status: 'Success', payload: products });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
 
-import ProductManager from "../managers/product.manager.js";
-const productManager = new ProductManager(`${__dirname}/db/products.json`);
+products.get('/:idProduct', async (req, res) => {
+  try {
+    const { idProduct } = req.params;
+    const product = await productManager.getProductById(idProduct);
+    if (!product) res.status(404).json({ message: 'Product not found' });
+    else res.status(200).json({ status: 'Success', payload: product });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-import { productCheck } from "../middlewares/productCheck.js";
+products.post('/', productCheck, async (req, res) => {
+  try {
+    const product = req.body;
+    console.log(product);
+    const newProduct = await productManager.createProduct(product);
+    res.status(201).json({ status: 'Success', payload: newProduct });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
 
-products.get('/', async(req,res)=>{
-    try{
-        const { limit } = req.query;
-        const products = await productManager.getProducts(Number(limit));
-        if (!products) res.status(404).json({message:"Products not found"});
-        res.status(200).json(products);
-    } catch (error) {
-        res.status(404).json({message:error.message})
-    }
-})
+products.put('/:idProduct', async (req, res) => {
+  try {
+    const { idProduct } = req.params;
+    const product = req.body;
+    const productUpdate = await productManager.updateProduct(
+      idProduct,
+      product
+    );
+    if (!productUpdate)
+      res.status(404).json({ message: 'Error updating product.' });
+    res.status(200).json({ status: 'Success', payload: productUpdate });
+  } catch {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-products.get('/:idProduct', async(req,res)=>{
-    try {
-        const { idProduct } = req.params;
-        const product = await productManager.getProductByID(idProduct);
-        if (!product) res.status(404).json({message: "Product not found"});
-        else res.status(200).json(product);
-    } catch (error) {
-        res.status(500).json({message:error.message})
-    }
-})
-
-products.post('/', productCheck, async (req,res) => {
-    try {
-        const product = req.body;
-        const newProduct = await productManager.createProduct(product);
-        res.json(newProduct);
-    } catch(error) {
-        res.status(404).json({message:error.message})
-    }
-})
-
-products.put("/:idProduct", async (req,res) => {
-    try {
-        const {idProduct} = req.params;
-        const product = req.body;
-        const productUpdate = await productManager.updateProduct(product, idProduct);
-        if (!productUpdate) res.status(404).json({message:"Error updating product."});
-        res.status(200).json({message: "OK", product: productUpdate });
-    } catch {
-        res.status(500).json({message:error.message});
-    }
-})
-
-products.delete("/:idProduct", async (req,res) => {
-    try {
-        const {idProduct} = req.params;
-        const productDelete = await productManager.deleteProduct(idProduct);
-        if(!productDelete) res.status(404).json({message:"Error deleting product."});
-        res.status(200).send(`El producto ${idProduct} ha sido eliminado correctamente.`);
-    } catch(error) {
-        res.status(500).json({message:error.message});
-    }
-})
+products.delete('/:idProduct', async (req, res) => {
+  try {
+    const { idProduct } = req.params;
+    const productDelete = await productManager.deleteProduct(idProduct);
+    if (!productDelete)
+      res.status(404).json({ message: 'Error deleting product.' });
+    res
+      .status(200)
+      .send(`El producto ${idProduct} ha sido eliminado correctamente.`);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 export default products;

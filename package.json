@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "nodemon": "nodemon src/app.js"
   },
   "author": "",
   "license": "ISC",
@@ -11,9 +12,8 @@
   "description": "",
   "dependencies": {
     "express": "^4.19.2",
-    "express-handlebars": "^7.1.2",
-    "nodemon": "^3.1.0",
-    "socket.io": "^4.7.5",
-    "uuidv4": "^6.2.13"
+    "mongoose": "^8.4.1",
+    "mongoose-paginate-v2": "^1.8.2",
+    "nodemon": "^3.1.0"
   }
 }
