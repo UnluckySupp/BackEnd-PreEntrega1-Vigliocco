@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import CartManager from '../dao/mongoDB/cart.dao.js';
 
-const carts = Router();
+const router = Router();
 const cartManager = new CartManager();
 
-carts.post('/', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const cart = await cartManager.createCart();
     res.status(201).json({ status: 'Success', payload: cart });
@@ -13,7 +13,7 @@ carts.post('/', async (req, res) => {
   }
 });
 
-carts.get('/:idCart', async (req, res) => {
+router.get('/:idCart', async (req, res) => {
   try {
     const { idCart } = req.params;
     const cart = await cartManager.getCartById(idCart);
@@ -24,7 +24,7 @@ carts.get('/:idCart', async (req, res) => {
   }
 });
 
-carts.post('/:idCart/product/:idProduct', async (req, res, next) => {
+router.post('/:idCart/product/:idProduct', async (req, res, next) => {
   try {
     const { idProduct } = req.params;
     const { idCart } = req.params;
@@ -37,7 +37,7 @@ carts.post('/:idCart/product/:idProduct', async (req, res, next) => {
   }
 });
 
-carts.delete(`/:idCart/product/:idProduct`, async (req, res) => {
+router.delete(`/:idCart/product/:idProduct`, async (req, res) => {
   try {
     const { idProduct } = req.params;
     const { idCart } = req.params;
@@ -51,7 +51,7 @@ carts.delete(`/:idCart/product/:idProduct`, async (req, res) => {
   }
 });
 
-carts.put(`/:idCart/product/:idProduct`, async (req, res) => {
+router.put(`/:idCart/product/:idProduct`, async (req, res) => {
   try {
     const { idProduct } = req.params;
     const { idCart } = req.params;
@@ -67,7 +67,7 @@ carts.put(`/:idCart/product/:idProduct`, async (req, res) => {
   }
 });
 
-carts.delete(`/:idCart`, async (req, res) => {
+router.delete(`/:idCart`, async (req, res) => {
   try {
     const { idCart } = req.params;
     const cart = await cartManager.deleteAllProductsInCart(idCart);
@@ -77,4 +77,4 @@ carts.delete(`/:idCart`, async (req, res) => {
   }
 });
 
-export default carts;
+export default router;

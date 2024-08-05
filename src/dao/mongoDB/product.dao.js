@@ -3,8 +3,7 @@ import { productModel } from './models/product.model.js';
 export default class ProductMaganer {
   getProducts = async (query, filter) => {
     try {
-      const products = await productModel.paginate(query, filter);
-      console.log(products);
+      const products = await productModel.find(query, filter);
       return products;
     } catch (error) {
       console.error(`error:${error}`);
@@ -14,7 +13,6 @@ export default class ProductMaganer {
   getProductById = async idProduct => {
     try {
       const product = await productModel.findById(idProduct);
-      console.log(product);
       return product;
     } catch (error) {
       console.error(`error:${error}`);
@@ -32,13 +30,9 @@ export default class ProductMaganer {
 
   updateProduct = async (idProduct, product) => {
     try {
-      const updateProduct = await productModel.findByIdAndUpdate(
-        idProduct,
-        product,
-        {
-          new: true,
-        }
-      );
+      const updateProduct = await productModel.findByIdAndUpdate(idProduct, product, {
+        new: true,
+      });
       return updateProduct;
     } catch (error) {
       console.error(`error:${error}`);
@@ -47,11 +41,7 @@ export default class ProductMaganer {
 
   deleteProduct = async idProduct => {
     try {
-      const deletedProduct = await productModel.findByIdAndUpdate(
-        idProduct,
-        { status: false },
-        { new: true }
-      );
+      const deletedProduct = await productModel.findByIdAndUpdate(idProduct, { status: false }, { new: true });
       return deletedProduct;
     } catch (error) {
       console.error(`error:${error}`);
