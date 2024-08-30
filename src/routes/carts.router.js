@@ -1,80 +1,28 @@
 import { Router } from 'express';
-import CartManager from '../dao/mongoDB/cart.dao.js';
+import cartController from '../controllers/cart.controller.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import passport from 'passport';
+import { checkProdAndCart } from '../middlewares/checkProdAndCart.middleware.js';
 
 const router = Router();
-const cartManager = new CartManager();
 
-router.post('/', async (req, res) => {
-  try {
-    const cart = await cartManager.createCart();
-    res.status(201).json({ status: 'Success', payload: cart });
-  } catch (error) {
-    res.status(500).json(error.message);
-  }
-});
-
-router.get('/:idCart', async (req, res) => {
-  try {
-    const { idCart } = req.params;
-    const cart = await cartManager.getCartById(idCart);
-    console.log(cart);
-    res.status(200).json({ status: 'Success', payload: cart });
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-router.post('/:idCart/product/:idProduct', async (req, res, next) => {
-  try {
-    const { idProduct } = req.params;
-    const { idCart } = req.params;
-    const { quantity } = req.body;
-    const newQuery = quantity ? quantity : 1;
-    const cart = await cartManager.pushProductInCart(idCart, idProduct, newQuery);
-    res.status(201).json({ status: 'Success', payload: cart });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.delete(`/:idCart/product/:idProduct`, async (req, res) => {
-  try {
-    const { idProduct } = req.params;
-    const { idCart } = req.params;
-    const cart = await cartManager.deleteProductInCart(idCart, idProduct);
-    if (cart.product === false) {
-      res.status(404).json({ status: `Product ${cart.id} not found` });
-    }
-    res.status(201).json({ status: 'Success', payload: cart });
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-router.put(`/:idCart/product/:idProduct`, async (req, res) => {
-  try {
-    const { idProduct } = req.params;
-    const { idCart } = req.params;
-    const { quantity } = req.body;
-    const newQuery = quantity ? quantity : 1;
-    const cart = await cartManager.updateByQuantity(idCart, idProduct, newQuery);
-    if (cart.product === false) {
-      res.status(404).json({ status: `Product doesn't exist in the cart` });
-    }
-    res.status(201).json({ status: 'Success', payload: cart });
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-router.delete(`/:idCart`, async (req, res) => {
-  try {
-    const { idCart } = req.params;
-    const cart = await cartManager.deleteAllProductsInCart(idCart);
-    res.status(201).json({ status: 'Success', payload: cart });
-  } catch (error) {
-    console.error(error);
-  }
-});
+router.post('/', cartController.newCart);
+router.get('/:idCart', cartController.findCartById);
+router.post('/:idCart/product/:idProduct', authMiddleware('user'), checkProdAndCart, cartController.putProductInCart);
+router.delete(`/:idCart/product/:idProduct`, checkProdAndCart, cartController.deleteProductInCart);
+router.put(
+  '/:idCart/product/:idProduct',
+  passport.authenticate('jwt'),
+  authMiddleware('user'),
+  checkProdAndCart,
+  cartController.updateQuantityProductInCart
+);
+router.delete(`/:idCart`, cartController.deleteAllProductsInCart);
+router.get(
+  '/:idCart/purchase',
+  passport.authenticate('jwt'),
+  authMiddleware('user'),
+  cartController.purchaseController
+);
 
 export default router;

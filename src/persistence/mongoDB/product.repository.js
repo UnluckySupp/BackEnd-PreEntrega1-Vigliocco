@@ -3,10 +3,11 @@ import { productModel } from './models/product.model.js';
 export default class ProductMaganer {
   getProducts = async (query, filter) => {
     try {
-      const products = await productModel.find(query, filter);
+      const products = await productModel.paginate(query, filter);
       return products;
     } catch (error) {
       console.error(`error:${error}`);
+      throw new Error('Products not found');
     }
   };
 
